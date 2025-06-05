@@ -5,6 +5,6 @@ import com.example.hms.ResponseDto.DoctorResponse;
 
 public interface DoctorService {
 
-    DoctorResponse createDoctorProfile(Integer adminUserId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest);
-    DoctorResponse updateDoctorProfile(Integer adminUserId, Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest);
+    DoctorResponse createDoctorProfile(Integer departmentId, Integer specializationId, DoctorRequest doctorRequest);
+    DoctorResponse updateDoctorProfile(Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest);
 }

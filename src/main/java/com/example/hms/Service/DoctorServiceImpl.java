@@ -10,7 +10,9 @@ import com.example.hms.Mapper.DoctorMapper;
 import com.example.hms.Repository.*;
 import com.example.hms.RequestDto.DoctorRequest;
 import com.example.hms.ResponseDto.DoctorResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,19 +25,24 @@ public class DoctorServiceImpl implements DoctorService{
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    public DoctorResponse createDoctorProfile(Integer adminUserId,Integer departmentId,Integer specializationId, DoctorRequest doctorRequest){
-         if (userRepository.existsByEmail(doctorRequest.getUser().getEmail())) {
+    public DoctorResponse createDoctorProfile(Integer departmentId,Integer specializationId, DoctorRequest doctorRequest){
+
+        User adminUser = authUtil.getCurrentUser();
+        if (userRepository.existsByEmail(doctorRequest.getUser().getEmail())) {
                 throw new ResourceAlreadyExistException("Email already exists");
             }
             User user = new User();
             user.setEmail(doctorRequest.getUser().getEmail());
-            user.setPassword(doctorRequest.getUser().getPassword());
+            user.setPassword(passwordEncoder.encode(doctorRequest.getUser().getPassword()));
             user.setUserRole(UserRole.DOCTOR);
 
             userRepository.save(user);
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(()->new AdminNotFoundException("admin not found with this id "+adminUserId));
+//        Admin admin = adminRepository.findById(adminUserId)
+//                .orElseThrow(()->new AdminNotFoundException("admin not found with this id "+adminUserId));
+
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(()-> new DepartmentNotFoundException("department not found with this id "+departmentId));
         Specialization specialization = specializationRepository.findById(specializationId)
@@ -47,16 +54,17 @@ public class DoctorServiceImpl implements DoctorService{
         doctor.setDepartment(department);
         doctor.setSpecialization(specialization);
         doctor.setUser(user);
-        doctor.setCreatedBy(admin);
+        doctor.setCreatedBy(adminUser.getAdmin());
 
         return doctorMapper.mapToDoctorResponse(doctorRepository.save(doctor));
     }
 
-    public DoctorResponse updateDoctorProfile(Integer adminUserId, Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest) {
+    public DoctorResponse updateDoctorProfile(Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest) {
 
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found with id " + adminUserId));
+//        Admin admin = adminRepository.findById(adminUserId)
+//                .orElseThrow(() -> new AdminNotFoundException("Admin not found with id " + adminUserId));
 
+        User currentUser = authUtil.getCurrentUser();
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DepartmentNotFoundException("Doctor not found with id " + doctorId));
 
@@ -73,7 +81,7 @@ public class DoctorServiceImpl implements DoctorService{
         doctor.setExperienceYears(doctorRequest.getExperienceYears());
         doctor.setDepartment(department);
         doctor.setSpecialization(specialization);
-        doctor.setCreatedBy(admin);
+        doctor.setCreatedBy(currentUser.getAdmin());
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
         return doctorMapper.mapToDoctorResponse(updatedDoctor);

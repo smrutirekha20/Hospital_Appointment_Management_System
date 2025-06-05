@@ -26,8 +26,8 @@ public class Admin{
 //    @OneToMany(mappedBy = "admin",cascade = CascadeType.ALL)
 //    private List<Specialization> specializations;
 //
-//    @OneToMany(mappedBy = "admin",cascade = CascadeType.ALL)
-//    private List<Department> departments;
+    @OneToMany(mappedBy = "createdBy",cascade = CascadeType.ALL)
+    private List<Department> departments;
 
     @OneToMany(mappedBy = "createdBy",cascade = CascadeType.ALL)
     private List<Doctor> doctors;

@@ -11,6 +11,7 @@ import com.example.hms.Repository.AdminRepository;
 import com.example.hms.Repository.UserRepository;
 import com.example.hms.RequestDto.AdminRequest;
 import com.example.hms.ResponseDto.AdminResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +23,12 @@ public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
     private UserRepository userRepository;
+    private AuthUtil authUtil;
 
-    public AdminResponse createAdmin(Integer userId,AdminRequest adminRequest){
+    public AdminResponse createAdmin(AdminRequest adminRequest){
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = authUtil.getCurrentUser();
+        // Admin currentAdmin = user.getAdmin();
 
         if (user.getUserRole() != UserRole.ADMIN) {
             throw  new AdminNotFoundException("Admin not found with this id");
@@ -43,16 +45,20 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-   public AdminResponse updateAdminProfile(Integer userId, AdminRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+   public AdminResponse updateAdminProfile(Integer adminId,AdminRequest request) {
 
-        Admin admin = user.getAdmin();
+//
+//       User user = authUtil.getCurrentUser();
+//       Admin currentAdmin = user.getAdmin();
+     //  System.out.println("current user is"+currentAdmin);
+         Admin admin = adminRepository.findById(adminId)
+                 .orElseThrow(()->new RuntimeException(""));
         if (admin == null) {
-            throw new AdminNotFoundException("admin not found with this id "+userId);
+            throw new AdminNotFoundException("admin not found with this id ");
         }
         admin.setAdminName(request.getAdminName());
         admin.setPhoneNumber(request.getPhoneNumber());
+       //  currentAdmin.setUser(user);
 
         Admin updatedAdmin = adminRepository.save(admin);
         return adminMapper.mapToAdminResponse(updatedAdmin);

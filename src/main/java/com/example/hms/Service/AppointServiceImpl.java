@@ -8,11 +8,11 @@ import com.example.hms.Mapper.AppointmentMapper;
 import com.example.hms.Repository.*;
 import com.example.hms.RequestDto.AppointmentRequest;
 import com.example.hms.ResponseDto.AppointmentResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -24,10 +24,13 @@ public class AppointServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     //private final AdminRepository adminRepository;
+    private final AuthUtil authUtil;
 
-    public AppointmentResponse bookAppointment(Integer patientUserId, String doctorName, AppointmentRequest request) {
-        Patient patient = patientRepository.findByUserId(patientUserId)
-                .orElseThrow(() -> new PatientNotFoundException("Patient not found"));
+    public AppointmentResponse bookAppointment(String doctorName, AppointmentRequest request) {
+//        Patient patient = patientRepository.findByUserId(patientUserId)
+//                .orElseThrow(() -> new PatientNotFoundException("Patient not found"));
+        User user = authUtil.getCurrentUser();
+                //.getId();
         Doctor doctor = doctorRepository.findByDoctorNameIgnoreCase(doctorName)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with this name " + doctorName));;
 
@@ -38,7 +41,7 @@ public class AppointServiceImpl implements AppointmentService {
         Appointment appointment = new Appointment();
 
         appointment.setAppointmentDateAndTime(LocalDateTime.of(request.getSlotDate(), request.getSlotTime()));
-        appointment.setPatient(patient);
+        appointment.setPatient(user.getPatient());
         appointment.setDoctor(doctor);
 
         if (slot.getSlotStatus() == SlotStatus.AVAILABLE) {

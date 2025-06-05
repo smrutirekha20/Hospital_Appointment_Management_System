@@ -12,9 +12,16 @@ import com.example.hms.Repository.AdminRepository;
 import com.example.hms.Repository.PatientRepository;
 import com.example.hms.Repository.UserRepository;
 import com.example.hms.RequestDto.PatientRequest;
+import com.example.hms.ResponseDto.PageResponse;
 import com.example.hms.ResponseDto.PatientResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -41,11 +48,10 @@ public class PatientServiceImpl implements PatientService {
         return patientMapper.mapToPatientResponse(patientRepository.save(patient));
     }
 
-    public PatientResponse updatePatientByAdmin(Integer adminUserId,
-                                                    Integer patientUserId, PatientRequest request) {
+    public PatientResponse updatePatientByAdmin(Integer patientUserId, PatientRequest request) {
 
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found with ID: " + adminUserId));
+//        Admin admin = adminRepository.findById(adminUserId)
+//                .orElseThrow(() -> new AdminNotFoundException("Admin not found with ID: " + adminUserId));
 
         Patient patient = patientRepository.findById(patientUserId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientUserId));
@@ -60,6 +66,24 @@ public class PatientServiceImpl implements PatientService {
         }
 
         return patientMapper.mapToPatientResponse(patientRepository.save(patient));
+    }
+
+    public PageResponse<PatientResponse> getAllPatient(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Patient> patientPage = patientRepository.findAll(pageable);
+
+        List<PatientResponse> patientResponses = patientPage.getContent().stream()
+                .map(patientMapper::mapToPatientResponse)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                patientResponses,
+                patientPage.getNumber(),
+                patientPage.getSize(),
+                patientPage.getTotalElements(),
+                patientPage.getTotalPages(),
+                patientPage.isLast()
+        );
     }
 }
 

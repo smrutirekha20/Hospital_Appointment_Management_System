@@ -9,6 +9,7 @@ import com.example.hms.utility.ResponseStructure;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,15 +19,17 @@ public class AdminController {
     private final AppResponseBuilder appResponseBuilder;
     private final AdminService adminProfileService;
 
-    @PostMapping("/admin/{userId}/user")
-    public ResponseEntity<ResponseStructure<AdminResponse>> createAdmin(@PathVariable Integer userId, @RequestBody AdminRequest adminProfileRequest){
-        AdminResponse adminProfileResponse = adminProfileService.createAdmin(userId,adminProfileRequest);
+    @PostMapping("/admin/user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseStructure<AdminResponse>> createAdmin( @RequestBody AdminRequest adminProfileRequest){
+        AdminResponse adminProfileResponse = adminProfileService.createAdmin(adminProfileRequest);
         return appResponseBuilder.success(HttpStatus.CREATED,"Admin created",adminProfileResponse);
     }
 
-    @PutMapping("/admin/{userId}/user")
-    public ResponseEntity<ResponseStructure<AdminResponse>> updateAdmin(@PathVariable Integer userId, @RequestBody AdminRequest adminProfileRequest){
-        AdminResponse adminProfileResponse = adminProfileService.updateAdminProfile(userId,adminProfileRequest);
+    @PutMapping("/admin/{adminId}/user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseStructure<AdminResponse>> updateAdmin(@PathVariable Integer adminId,@RequestBody AdminRequest adminProfileRequest){
+        AdminResponse adminProfileResponse = adminProfileService.updateAdminProfile(adminId,adminProfileRequest);
         return appResponseBuilder.success(HttpStatus.CREATED,"Admin profile updated",adminProfileResponse);
     }
 }

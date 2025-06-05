@@ -8,6 +8,7 @@ import com.example.hms.utility.ResponseStructure;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,13 +19,14 @@ public class AppointmentController {
     private final AppResponseBuilder appResponseBuilder;
     private final AppointmentService appointmentService;
 
-    @PostMapping("/patients/{patientId}/doctors/{doctorName}")
-    public ResponseEntity<ResponseStructure<AppointmentResponse>> bookAppointments(@PathVariable Integer patientId,
-                                                                                   @PathVariable String doctorName, @RequestBody AppointmentRequest appointmentRequest){
-        AppointmentResponse appointmentResponse = appointmentService.bookAppointment(patientId,doctorName,appointmentRequest);
+    @PostMapping("/patient/doctors/{doctorName}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<ResponseStructure<AppointmentResponse>> bookAppointments(@PathVariable String doctorName, @RequestBody AppointmentRequest appointmentRequest){
+        AppointmentResponse appointmentResponse = appointmentService.bookAppointment(doctorName,appointmentRequest);
         return appResponseBuilder.success(HttpStatus.CREATED,"Appointment Booked By Patient",appointmentResponse);
     }
     @PutMapping("/admin/reschedule/appointment/{appointmentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseStructure<AppointmentResponse>> reschedulePendingAppointmentByAdmin(@PathVariable Integer appointmentId,
                                                                                                      @RequestBody AppointmentRequest request){
         AppointmentResponse appointmentResponse = appointmentService.reschedulePendingAppointmentByAdmin(appointmentId, request);
