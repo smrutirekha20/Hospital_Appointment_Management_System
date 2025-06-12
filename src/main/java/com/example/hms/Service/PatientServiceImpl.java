@@ -12,6 +12,7 @@ import com.example.hms.Repository.AdminRepository;
 import com.example.hms.Repository.PatientRepository;
 import com.example.hms.Repository.UserRepository;
 import com.example.hms.RequestDto.PatientRequest;
+import com.example.hms.ResponseDto.PageResponse;
 import com.example.hms.ResponseDto.PatientResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,14 +45,14 @@ public class PatientServiceImpl implements PatientService {
         return patientMapper.mapToPatientResponse(patientRepository.save(patient));
     }
 
-    public PatientResponse updatePatientByAdmin(Integer adminUserId,
-                                                    Integer patientUserId, PatientRequest request) {
+    public PatientResponse updatePatientByAdmin(Integer adminId,
+                                                    Integer patientId, PatientRequest request) {
 
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found with ID: " + adminUserId));
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found with ID: " + adminId));
 
-        Patient patient = patientRepository.findById(patientUserId)
-                .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientUserId));
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
 
         if (patient != null){
             patient.setPatientName(request.getPatientName());
@@ -71,7 +72,7 @@ public class PatientServiceImpl implements PatientService {
 
         int offset = (pageNumber - 1) * pageSize;
 
-        List<Patient> patients = patientRepository.findPatientByPagination(pageSize, offset);
+        List<Patient> patients = patientRepository.findPatientsByPagination(pageSize, offset);
         long total = patientRepository.countAllPatients();
 
         List<PatientResponse> responses = patients.stream()

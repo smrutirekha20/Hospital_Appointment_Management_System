@@ -14,14 +14,10 @@ public  enum UserRole {
     ,Privilege.ADMIN_WRITE)),
 
     PATIENT(List.of(Privilege.PATIENT_WRITE,
-            Privilege.PATIENT_READ,
-            Privilege.ADMIN_WRITE,
-            Privilege.ADMIN_READ)),
+            Privilege.PATIENT_READ)),
 
     DOCTOR(List.of(Privilege.DOCTOR_READ,
-            Privilege.DOCTOR_WRITE,
-            Privilege.ADMIN_WRITE,
-            Privilege.ADMIN_READ));
+            Privilege.DOCTOR_WRITE));
 
     private List<Privilege> privileges;
 }
