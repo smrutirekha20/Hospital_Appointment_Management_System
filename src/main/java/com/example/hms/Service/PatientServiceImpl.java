@@ -16,6 +16,9 @@ import com.example.hms.ResponseDto.PatientResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class PatientServiceImpl implements PatientService {
@@ -60,6 +63,31 @@ public class PatientServiceImpl implements PatientService {
         }
 
         return patientMapper.mapToPatientResponse(patientRepository.save(patient));
+    }
+    public PageResponse<PatientResponse> getAllPatient(Integer page, Integer size) {
+        int defaultPageSize = 10;
+        int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
+        int pageNumber = (page == null || page <= 0) ? 1 : page;
+
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Patient> patients = patientRepository.findPatientByPagination(pageSize, offset);
+        long total = patientRepository.countAllPatients();
+
+        List<PatientResponse> responses = patients.stream()
+                .map(patientMapper::mapToPatientResponse)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                responses,
+                pageNumber,
+                pageSize,
+                total,
+                (int) Math.ceil((double) total / pageSize),
+                pageNumber * pageSize >= total
+        );
+
+
     }
 }
 
