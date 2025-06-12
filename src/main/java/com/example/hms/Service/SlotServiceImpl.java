@@ -8,16 +8,19 @@ import com.example.hms.Exception.SpecializationNotFoundException;
 import com.example.hms.Mapper.SlotMapper;
 import com.example.hms.Repository.*;
 import com.example.hms.RequestDto.SlotRequest;
+import com.example.hms.ResponseDto.PageResponse;
+import com.example.hms.ResponseDto.PatientResponse;
 import com.example.hms.ResponseDto.SlotResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class SlotServiceImpl implements SlotService{
+public class SlotServiceImpl implements SlotService {
 
     private final AdminRepository adminRepository;
     private final DepartmentRepository departmentRepository;
@@ -27,16 +30,16 @@ public class SlotServiceImpl implements SlotService{
     private final SlotRepository slotRepository;
 
     public List<SlotResponse> createSlot(Integer adminUserId, Integer departmentId, Integer specializationId,
-                                         Integer doctorUserId, List<SlotRequest> request){
+                                         Integer doctorUserId, List<SlotRequest> request) {
         Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(()->new AdminNotFoundException("Admin not found"));
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
 
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(()->new DepartmentNotFoundException("Department not found"));
+                .orElseThrow(() -> new DepartmentNotFoundException("Department not found"));
         Specialization specialization = specializationRepository.findById(specializationId)
-                .orElseThrow(()->new SpecializationNotFoundException("specialization not found"));
+                .orElseThrow(() -> new SpecializationNotFoundException("specialization not found"));
         Doctor doctor = doctorRepository.findByUserId(doctorUserId)
-                .orElseThrow(()->new DoctorNotFoundException("Doctor not found"));
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found"));
         if (!doctor.getDepartment().getDepartmentId().equals(departmentId) ||
                 !doctor.getSpecialization().getSpecializationId().equals(specializationId)) {
             throw new RuntimeException("Doctor does not belong to provided department/specialization");
@@ -59,5 +62,29 @@ public class SlotServiceImpl implements SlotService{
         List<Slot> slots = slotRepository.getAvailableSlots(doctorName);
         return slots.stream().map(slotMapper::mapToSlotResponse)
                 .toList();
+    }
+
+    public PageResponse<SlotResponse> getAllSlot(Integer doctorId, Integer page, Integer size) {
+        int defaultPageSize = 10;
+        int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
+        int pageNumber = (page == null || page <= 0) ? 1 : page;
+
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Slot> slots = slotRepository.findSlotsByDoctorIdWithPagination(doctorId, pageSize, offset);
+        long total = slotRepository.countByDoctorId(doctorId);
+
+        List<SlotResponse> responses = slots.stream()
+                .map(slotMapper::mapToSlotResponse)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                responses,
+                pageNumber,
+                pageSize,
+                total,
+                (int) Math.ceil((double) total / pageSize),
+                pageNumber * pageSize >= total
+        );
     }
 }

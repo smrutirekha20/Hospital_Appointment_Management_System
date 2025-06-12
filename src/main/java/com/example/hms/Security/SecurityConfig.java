@@ -36,7 +36,7 @@ public class SecurityConfig {
                       //  .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN_READ")
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
+              //  .httpBasic(Customizer.withDefaults())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

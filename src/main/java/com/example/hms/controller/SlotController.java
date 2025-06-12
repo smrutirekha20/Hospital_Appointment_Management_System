@@ -1,6 +1,8 @@
 package com.example.hms.controller;
 
 import com.example.hms.RequestDto.SlotRequest;
+import com.example.hms.ResponseDto.PageResponse;
+import com.example.hms.ResponseDto.PatientResponse;
 import com.example.hms.ResponseDto.SlotResponse;
 import com.example.hms.Service.SlotService;
 import com.example.hms.utility.AppResponseBuilder;
@@ -8,6 +10,7 @@ import com.example.hms.utility.ResponseStructure;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,5 +34,14 @@ public class SlotController {
     public ResponseEntity<ResponseStructure<List<SlotResponse>>> getAvailableSlots(@PathVariable String doctorName){
         List<SlotResponse> slotResponses = slotService.getAvailableSlots(doctorName);
         return appResponseBuilder.success(HttpStatus.FOUND,"available slot found",slotResponses);
+    }
+    @GetMapping("patient/slot")
+    @PreAuthorize("hasAuthority('PATIENT_READ')")
+    public ResponseEntity<ResponseStructure<PageResponse<SlotResponse>>> getAllPatients(
+            @RequestParam Integer doctorId,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size) {
+        PageResponse<SlotResponse> response = slotService.getAllSlot(doctorId,page, size);
+        return appResponseBuilder.success(HttpStatus.FOUND, "Patient found", response);
     }
 }

@@ -19,5 +19,14 @@ public interface SlotRepository extends JpaRepository<Slot,Integer> {
             "WHERE s.slotStatus = 'AVAILABLE' " +
             "AND (:doctorName IS NULL OR LOWER(s.doctor.doctorName) LIKE LOWER(CONCAT('%', :doctorName, '%'))) " )
     List<Slot> getAvailableSlots(@Param("doctorName") String doctorName);
+
     Optional<Slot> findByDoctorAndSlotDateAndSlotTime(Doctor doctor, LocalDate slotDate, LocalTime slotTime);
+
+    @Query(value = "SELECT * FROM slots WHERE doctor_user_id = :doctorId LIMIT :limit OFFSET :offset", nativeQuery = true)
+    List<Slot> findSlotsByDoctorIdWithPagination(@Param("doctorId") Integer doctorId,
+                                                 @Param("limit") int limit,
+                                                 @Param("offset") int offset);
+
+    @Query(value = "SELECT COUNT(*) FROM slots WHERE doctor_user_id = :doctorId", nativeQuery = true)
+    long countByDoctorId(@Param("doctorId") Integer doctorId);
 }
