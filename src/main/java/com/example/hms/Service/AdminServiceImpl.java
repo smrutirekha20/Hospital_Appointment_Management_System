@@ -11,6 +11,7 @@ import com.example.hms.Repository.AdminRepository;
 import com.example.hms.Repository.UserRepository;
 import com.example.hms.RequestDto.AdminRequest;
 import com.example.hms.ResponseDto.AdminResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
     private UserRepository userRepository;
+    private final AuthUtil authUtil;
 
     public AdminResponse createAdmin(Integer userId,AdminRequest adminRequest){
 
@@ -43,14 +45,12 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-   public AdminResponse updateAdminProfile(Integer userId, AdminRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+   public AdminResponse updateAdminProfile(AdminRequest request) {
 
-        Admin admin = user.getAdmin();
-        if (admin == null) {
-            throw new AdminNotFoundException("admin not found with this id "+userId);
-        }
+
+       User currentUser = authUtil.getCurrentUser(); // fetch from SecurityContext
+       Admin admin = adminRepository.findByUser(currentUser)
+               .orElseThrow(() -> new AdminNotFoundException("Admin not found for this user"));
         admin.setAdminName(request.getAdminName());
         admin.setPhoneNumber(request.getPhoneNumber());
 
