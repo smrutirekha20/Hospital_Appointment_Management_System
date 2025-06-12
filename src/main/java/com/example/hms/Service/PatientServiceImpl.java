@@ -68,22 +68,30 @@ public class PatientServiceImpl implements PatientService {
         return patientMapper.mapToPatientResponse(patientRepository.save(patient));
     }
 
-    public PageResponse<PatientResponse> getAllPatient(Integer pageNumber, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Patient> patientPage = patientRepository.findAll(pageable);
+    public PageResponse<PatientResponse> getAllPatient(Integer page, Integer size) {
+        int defaultPageSize = 10;
+        int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
+        int pageNumber = (page == null || page <= 0) ? 1 : page;
 
-        List<PatientResponse> patientResponses = patientPage.getContent().stream()
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Patient> patients = patientRepository.findPatientByPagination(pageSize, offset);
+        long total = patientRepository.countAllPatients();
+
+        List<PatientResponse> responses = patients.stream()
                 .map(patientMapper::mapToPatientResponse)
                 .collect(Collectors.toList());
 
         return new PageResponse<>(
-                patientResponses,
-                patientPage.getNumber(),
-                patientPage.getSize(),
-                patientPage.getTotalElements(),
-                patientPage.getTotalPages(),
-                patientPage.isLast()
+                responses,
+                pageNumber,
+                pageSize,
+                total,
+                (int) Math.ceil((double) total / pageSize),
+                pageNumber * pageSize >= total
         );
+
+
     }
 }
 

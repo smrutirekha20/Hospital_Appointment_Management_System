@@ -36,10 +36,10 @@ public class PatientController {
 
     @GetMapping("admin/patients")
     public ResponseEntity<ResponseStructure<PageResponse<PatientResponse>>>
-                                      getAllPatient( @RequestParam(defaultValue = "0") Integer pageNumber,
-                                                     @RequestParam(defaultValue = "10") Integer pageSize) {
+                                      getAllPatient( @RequestParam(value = "page", required = false) Integer page,
+                                                     @RequestParam(value = "size", required = false) Integer size){
 
-        PageResponse<PatientResponse> response = patientService.getAllPatient(pageNumber, pageSize);
+        PageResponse<PatientResponse> response = patientService.getAllPatient(page, size);
         return appResponseBuilder.success(HttpStatus.FOUND,"all patient found",response);
         }
 }
