@@ -5,5 +5,5 @@ import com.example.hms.ResponseDto.AppointmentResponse;
 
 public interface AppointmentService {
     AppointmentResponse bookAppointment(Integer patientUserId, String doctorName, AppointmentRequest request);
-    AppointmentResponse reschedulePendingAppointmentByAdmin(Integer appointmentId,AppointmentRequest request);
+    AppointmentResponse reschedulePendingAppointmentByAdmin(Integer adminId,Integer appointmentId,AppointmentRequest request);
 }

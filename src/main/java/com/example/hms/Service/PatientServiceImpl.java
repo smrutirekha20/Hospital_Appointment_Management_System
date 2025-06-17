@@ -14,7 +14,9 @@ import com.example.hms.Repository.UserRepository;
 import com.example.hms.RequestDto.PatientRequest;
 import com.example.hms.ResponseDto.PageResponse;
 import com.example.hms.ResponseDto.PatientResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +30,7 @@ public class PatientServiceImpl implements PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
+    private final AuthUtil authUtil;
 
     public PatientResponse registerPatient(Integer userId,PatientRequest patientRequest) {
 
@@ -51,6 +54,11 @@ public class PatientServiceImpl implements PatientService {
         Admin admin = adminRepository.findById(adminId)
                 .orElseThrow(() -> new AdminNotFoundException("Admin not found with ID: " + adminId));
 
+        User currentUser = authUtil.getCurrentUser();
+
+        if (!admin.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this admin");
+        }
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
 

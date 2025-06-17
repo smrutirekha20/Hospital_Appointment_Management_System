@@ -10,7 +10,9 @@ import com.example.hms.Mapper.DoctorMapper;
 import com.example.hms.Repository.*;
 import com.example.hms.RequestDto.DoctorRequest;
 import com.example.hms.ResponseDto.DoctorResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,8 +25,9 @@ public class DoctorServiceImpl implements DoctorService{
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
     private final UserRepository userRepository;
+    private final AuthUtil authUtil;
 
-    public DoctorResponse createDoctorProfile(Integer adminUserId,Integer departmentId,Integer specializationId, DoctorRequest doctorRequest){
+    public DoctorResponse createDoctorProfile(Integer adminId,Integer departmentId,Integer specializationId, DoctorRequest doctorRequest){
          if (userRepository.existsByEmail(doctorRequest.getUser().getEmail())) {
                 throw new ResourceAlreadyExistException("Email already exists");
             }
@@ -34,8 +37,12 @@ public class DoctorServiceImpl implements DoctorService{
             user.setUserRole(UserRole.DOCTOR);
 
             userRepository.save(user);
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(()->new AdminNotFoundException("admin not found with this id "+adminUserId));
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(()->new AdminNotFoundException("admin not found with this id "+adminId));
+        User currentUser = authUtil.getCurrentUser();
+        if (!admin.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this admin");
+        }
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(()-> new DepartmentNotFoundException("department not found with this id "+departmentId));
         Specialization specialization = specializationRepository.findById(specializationId)
@@ -52,11 +59,15 @@ public class DoctorServiceImpl implements DoctorService{
         return doctorMapper.mapToDoctorResponse(doctorRepository.save(doctor));
     }
 
-    public DoctorResponse updateDoctorProfile(Integer adminUserId, Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest) {
+    public DoctorResponse updateDoctorProfile(Integer adminId, Integer doctorId, Integer departmentId, Integer specializationId, DoctorRequest doctorRequest) {
 
-        Admin admin = adminRepository.findById(adminUserId)
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found with id " + adminUserId));
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found with id " + adminId));
 
+        User currentUser = authUtil.getCurrentUser();
+        if (!admin.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this admin");
+        }
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DepartmentNotFoundException("Doctor not found with id " + doctorId));
 

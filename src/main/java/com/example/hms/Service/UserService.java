@@ -14,6 +14,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +24,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse saveUser(UserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -30,6 +32,8 @@ public class UserService {
         }
 
         User user = userMapper.mapToUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         user = userRepository.save(user);
 
         return userMapper.mapToUserResponse(user);

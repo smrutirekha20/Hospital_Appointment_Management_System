@@ -11,7 +11,9 @@ import com.example.hms.RequestDto.SlotRequest;
 import com.example.hms.ResponseDto.PageResponse;
 import com.example.hms.ResponseDto.PatientResponse;
 import com.example.hms.ResponseDto.SlotResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,12 +30,18 @@ public class SlotServiceImpl implements SlotService {
     private final DoctorRepository doctorRepository;
     private final SlotMapper slotMapper;
     private final SlotRepository slotRepository;
+    private final AuthUtil authUtil;
 
     public List<SlotResponse> createSlot(Integer adminUserId, Integer departmentId, Integer specializationId,
                                          Integer doctorUserId, List<SlotRequest> request) {
         Admin admin = adminRepository.findById(adminUserId)
                 .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
 
+        User currentUser = authUtil.getCurrentUser();
+
+        if (!admin.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this admin");
+        }
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentNotFoundException("Department not found"));
         Specialization specialization = specializationRepository.findById(specializationId)

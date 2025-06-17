@@ -8,7 +8,9 @@ import com.example.hms.Mapper.AppointmentMapper;
 import com.example.hms.Repository.*;
 import com.example.hms.RequestDto.AppointmentRequest;
 import com.example.hms.ResponseDto.AppointmentResponse;
+import com.example.hms.Security.AuthUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,11 +25,16 @@ public class AppointServiceImpl implements AppointmentService {
     private final SlotRepository slotRepository;
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
-    //private final AdminRepository adminRepository;
+    private final AdminRepository adminRepository;
+    private final AuthUtil authUtil;
 
     public AppointmentResponse bookAppointment(Integer patientUserId, String doctorName, AppointmentRequest request) {
         Patient patient = patientRepository.findByUserId(patientUserId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found"));
+//        User currentUser = authUtil.getCurrentUser();
+//        if (!patient.getUser().getId().equals(currentUser.getId())) {
+//            throw new AccessDeniedException("You are not authorized to update this admin");
+//        }
         Doctor doctor = doctorRepository.findByDoctorNameIgnoreCase(doctorName)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with this name " + doctorName));;
 
@@ -57,7 +64,16 @@ public class AppointServiceImpl implements AppointmentService {
     }
 
 
-    public AppointmentResponse reschedulePendingAppointmentByAdmin(Integer appointmentId, AppointmentRequest request) {
+    public AppointmentResponse reschedulePendingAppointmentByAdmin(Integer adminId,Integer appointmentId, AppointmentRequest request) {
+
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(()->new AdminNotFoundException("Admin not found exception"));
+
+        User currentUser = authUtil.getCurrentUser();
+        if (!admin.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this admin");
+        }
+
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 

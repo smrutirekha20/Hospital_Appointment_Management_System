@@ -5,5 +5,5 @@ import com.example.hms.ResponseDto.DepartmentResponse;
 
 public interface DepartmentService {
     DepartmentResponse createDepartment(Integer adminUserId,DepartmentRequest departmentRequest);
-    DepartmentResponse updateDepartment(Integer adminUserId,Integer departmentId,DepartmentRequest departmentRequest);
+    DepartmentResponse updateDepartment(Integer adminId,Integer departmentId,DepartmentRequest departmentRequest);
 }

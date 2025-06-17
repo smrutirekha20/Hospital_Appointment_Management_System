@@ -31,12 +31,21 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/register", "/api/v1/login","/swagger-ui/**").permitAll()
+                       // .requestMatchers("/api/v1/register", "/api/v1/login","/swagger-ui/**").permitAll()
                        // .requestMatchers("/api/v1/admin/**").hasAuthority("('ADMIN_WRITE')or hasAuthority('ADMIN_WRITE')")
                       //  .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN_READ")
+                        .requestMatchers(
+                                "/api/v1/register",
+                                "/api/v1/login",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN_WRITE","ADMIN_READ")
+                        .requestMatchers("/api/v1/patient/**").hasAnyAuthority("PATIENT_WRITE","PATIENT_READ")
                         .anyRequest().authenticated()
                 )
-              //  .httpBasic(Customizer.withDefaults())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

@@ -1,9 +1,11 @@
 package com.example.hms.Security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -16,15 +18,17 @@ import java.util.Map;
 @Service
 public class JwtService {
 
+    @Value("${hospital.jwt.secret}")
+    private String secretKey;
 
-    private String secretKey=" ";
+   // private String secretKey=" ";
 
 
-    public JwtService() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-        SecretKey sk=keyGenerator.generateKey();
-       secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-    }
+//    public JwtService() throws NoSuchAlgorithmException {
+//        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
+//        SecretKey sk=keyGenerator.generateKey();
+//       secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+//    }
 
     public String generateJwt(String userName,String userRole){
         return Jwts.builder()
@@ -32,17 +36,17 @@ public class JwtService {
                 .add(Map.of("userRole",userRole))
                 .subject(userName)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+100*60*60))
+                .expiration(new Date(System.currentTimeMillis()+1000*60*60*30))
                 .and()
-                .signWith(getSignInKey())
+                .signWith(getSignInKey(),Jwts.SIG.HS256)
                 .compact();
 
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(secretKey);
-                return Keys.hmacShaKeyFor(keyBytes);
-       // return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
+//        byte[] keyBytes= Decoders.BASE64.decode(secretKey);
+//                return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
 
     public Claims extractClaims(String token) {
