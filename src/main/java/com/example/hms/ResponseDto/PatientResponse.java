@@ -1,8 +1,10 @@
 package com.example.hms.ResponseDto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class PatientResponse {
 
     private Integer patientId;

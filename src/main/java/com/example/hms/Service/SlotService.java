@@ -11,4 +11,5 @@ public interface SlotService {
    List<SlotResponse> createSlot(Integer adminUserId, Integer doctorUserId, Integer departmentId, Integer specializationId, List<SlotRequest> request);
    List<SlotResponse> getAvailableSlots(String doctorName);
    PageResponse<SlotResponse> getAllSlot(Integer doctorId, Integer page, Integer size);
+   List<SlotResponse> filterAvailableSlot(String slotDate,Integer doctorId);
 }

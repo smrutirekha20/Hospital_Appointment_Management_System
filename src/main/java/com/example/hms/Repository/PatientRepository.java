@@ -19,4 +19,7 @@ public interface PatientRepository extends JpaRepository<Patient,Integer> {
 
    @Query(value = "SELECT COUNT(*) FROM patients", nativeQuery = true)
    long countAllPatients();
+
+ //  @Query("SELECT p From Patient p where LOWER(p.patientName) LIKE LOWER(CONCAT('%', :substring, '%'))")
+   List<Patient> searchByPatientNameContaining(@Param("substring") String substring);
 }

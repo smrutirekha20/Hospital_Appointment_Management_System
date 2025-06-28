@@ -1,11 +1,17 @@
 package com.example.hms.Entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "patients")
 @Data
+@Builder
+@NoArgsConstructor(force = true)
+@AllArgsConstructor
 public class Patient{
 
     @Id

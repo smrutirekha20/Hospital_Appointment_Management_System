@@ -95,4 +95,15 @@ public class SlotServiceImpl implements SlotService {
                 pageNumber * pageSize >= total
         );
     }
+    public List<SlotResponse> filterAvailableSlot(String slotDate,Integer doctorId){
+
+        if (slotDate != null && slotDate.isBlank()) {
+            slotDate = null;
+        }
+
+        List<Slot> slots = slotRepository.findAvailableSlotsByPartialDate(slotDate, doctorId);
+        return slots.stream()
+                .map(slotMapper::mapToSlotResponse)
+                .toList();
+    }
 }

@@ -98,5 +98,11 @@ public class PatientServiceImpl implements PatientService {
 
 
     }
+    public List<PatientResponse> searchPatientByPatientName(String subString){
+        List<Patient> patients = patientRepository.searchByPatientNameContaining(subString);
+        return patients.stream()
+                .map(patientMapper::mapToPatientResponse)
+                .collect(Collectors.toList());
+    }
 }
 

@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("${hospital.base_url}")
 @AllArgsConstructor
@@ -48,7 +50,7 @@ public class PatientController {
             })
 
     @PutMapping("/admin/{adminId}/patient/{patientId}")
-   // @PreAuthorize("hasAuthority('ADMIN_WRITE')")
+    @PreAuthorize("hasAuthority('ADMIN_WRITE')")
     public ResponseEntity<ResponseStructure<PatientResponse>> updatePatientProfile(@PathVariable Integer adminId,@PathVariable Integer patientId,@RequestBody PatientRequest patientRequest) {
         PatientResponse patientResponse = patientService.updatePatientByAdmin(adminId,patientId,patientRequest);
         return appResponseBuilder.success(HttpStatus.CREATED, "Patient details updated", patientResponse);
@@ -67,5 +69,13 @@ public class PatientController {
             @RequestParam(value = "size", required = false) Integer size) {
         PageResponse<PatientResponse> response = patientService.getAllPatient(page, size);
         return appResponseBuilder.success(HttpStatus.FOUND, "Patient found", response);
+    }
+
+    @GetMapping("admin/patient/search")
+    @PreAuthorize("hasAuthority('ADMIN_READ')")
+    public ResponseEntity<ResponseStructure<List<PatientResponse>>> searchPatientByPatientName(@RequestParam String nameSubstring){
+        List<PatientResponse> patientResponses = patientService.searchPatientByPatientName(nameSubstring);
+        return appResponseBuilder.success(HttpStatus.FOUND,"Patient name found",patientResponses);
+
     }
 }

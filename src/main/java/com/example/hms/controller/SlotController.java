@@ -1,5 +1,6 @@
 package com.example.hms.controller;
 
+import com.example.hms.Enum.SlotStatus;
 import com.example.hms.RequestDto.SlotRequest;
 import com.example.hms.ResponseDto.PageResponse;
 import com.example.hms.ResponseDto.PatientResponse;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -70,4 +72,13 @@ public class SlotController {
         PageResponse<SlotResponse> response = slotService.getAllSlot(doctorId,page, size);
         return appResponseBuilder.success(HttpStatus.OK, "Patient found", response);
     }
+    @GetMapping("patient/search")
+    @PreAuthorize("hasAuthority('PATIENT_READ')")
+    public ResponseEntity<ResponseStructure<List<SlotResponse>>> getSlots(
+            @RequestParam String slotDate,
+            @RequestParam Integer doctorId){
+        List<SlotResponse> slotResponses = slotService.filterAvailableSlot(slotDate,doctorId);
+        return appResponseBuilder.success(HttpStatus.FOUND,"available slot found",slotResponses);
+    }
+
 }

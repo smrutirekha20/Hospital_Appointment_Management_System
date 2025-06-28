@@ -29,4 +29,14 @@ public interface SlotRepository extends JpaRepository<Slot,Integer> {
 
     @Query(value = "SELECT COUNT(*) FROM slots WHERE doctor_user_id = :doctorId", nativeQuery = true)
     long countByDoctorId(@Param("doctorId") Integer doctorId);
+
+
+    @Query(value = """
+    SELECT * FROM slots s 
+    WHERE s.slot_status = 'AVAILABLE'
+      AND (:datePart IS NULL OR CAST(s.slot_date AS CHAR) LIKE %:datePart%)
+      AND (:doctorId IS NULL OR s.doctor_user_id = :doctorId)
+""", nativeQuery = true)
+    List<Slot> findAvailableSlotsByPartialDate(@Param("datePart") String datePart,
+                                               @Param("doctorId") Integer doctorId);
 }
